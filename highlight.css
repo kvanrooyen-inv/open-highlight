@@ -1,0 +1,14 @@
+.keyword-highlight {
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.keyword-highlight:hover {
+    transform: scale(1.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.keyword-highlight-container {
+    display: inline;
+}
