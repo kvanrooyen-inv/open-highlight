@@ -159,11 +159,12 @@ class ContentHighlighter {
 
         keywords.forEach(keyword => {
             const color = keywordMap.get(keyword);
+            const textColor = this.getContrastColor(color);
             const regex = new RegExp(`\\b${this.escapeRegExp(keyword)}\\b`, 'gi');
             
             const newHTML = highlightedHTML.replace(regex, (match) => {
                 hasHighlights = true;
-                return `<span class="${this.highlightClass}" style="background-color: ${color}; padding: 1px 2px; border-radius: 2px;">${match}</span>`;
+                return `<span class="${this.highlightClass}" style="background-color: ${color}; color: ${textColor}; padding: 1px 2px; border-radius: 2px;">${match}</span>`;
             });
             
             highlightedHTML = newHTML;
@@ -182,6 +183,22 @@ class ContentHighlighter {
             // Replace the text node with the container
             textNode.parentNode.replaceChild(container, textNode);
         }
+    }
+
+    getContrastColor(hexColor) {
+        // Remove the hash if it exists
+        const hex = hexColor.replace('#', '');
+        
+        // Parse RGB values
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        // Calculate luminance using the relative luminance formula
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        
+        // Return black for light backgrounds, white for dark backgrounds
+        return luminance > 0.5 ? '#000000' : '#ffffff';
     }
 
     escapeRegExp(string) {

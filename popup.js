@@ -51,8 +51,14 @@ class KeywordHighlighter {
                 <div class="category-header">
                     <input type="text" class="category-name" value="${category.name}" 
                            data-id="${category.id}" placeholder="Category name">
-                    <input type="color" class="color-picker" value="${category.color}" 
-                           data-id="${category.id}">
+                    <div class="color-controls">
+                        <div class="color-display" style="background-color: ${category.color}">
+                            <input type="color" class="color-picker" value="${category.color}" 
+                                   data-id="${category.id}">
+                        </div>
+                        <input type="text" class="hex-input" value="${category.color}" 
+                               data-id="${category.id}" placeholder="#000000" maxlength="7">
+                    </div>
                     <button class="delete-category" data-id="${category.id}">Delete</button>
                 </div>
                 <textarea class="keywords-input" data-id="${category.id}" 
@@ -80,12 +86,10 @@ class KeywordHighlighter {
                 this.updateCategoryName(e.target.dataset.id, e.target.value);
             } else if (e.target.classList.contains('keywords-input')) {
                 this.updateCategoryKeywords(e.target.dataset.id, e.target.value);
-            }
-        });
-
-        document.addEventListener('change', (e) => {
-            if (e.target.classList.contains('color-picker')) {
-                this.updateCategoryColor(e.target.dataset.id, e.target.value);
+            } else if (e.target.classList.contains('hex-input')) {
+                this.updateCategoryColorFromHex(e.target.dataset.id, e.target.value, e.target);
+            } else if (e.target.classList.contains('color-picker')) {
+                this.updateCategoryColorFromPicker(e.target.dataset.id, e.target.value, e.target);
             }
         });
 
@@ -100,7 +104,7 @@ class KeywordHighlighter {
         const newCategory = {
             id: Date.now(),
             name: 'New Category',
-            color: '#' + Math.floor(Math.random()*16777215).toString(16),
+            color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'),
             keywords: []
         };
         this.categories.push(newCategory);
@@ -116,6 +120,78 @@ class KeywordHighlighter {
             this.saveCategories();
             this.notifyContentScript();
         }
+    }
+
+    updateCategoryColorFromHex(id, hexValue, inputElement) {
+        // Clean up the hex value
+        let cleanHex = hexValue.trim().toUpperCase();
+        
+        // Add # if missing
+        if (cleanHex && !cleanHex.startsWith('#')) {
+            cleanHex = '#' + cleanHex;
+        }
+        
+        // Update the input to show the corrected format
+        if (inputElement.value !== cleanHex) {
+            inputElement.value = cleanHex;
+        }
+        
+        // Validate hex color format
+        if (this.isValidHexColor(cleanHex)) {
+            const category = this.categories.find(c => c.id == id);
+            if (category) {
+                category.color = cleanHex;
+                this.saveCategories();
+                this.notifyContentScript();
+                
+                // Update the color display and color picker
+                const colorDisplay = inputElement.closest('.color-controls').querySelector('.color-display');
+                const colorPicker = inputElement.closest('.color-controls').querySelector('.color-picker');
+                
+                if (colorDisplay) {
+                    colorDisplay.style.backgroundColor = cleanHex;
+                }
+                if (colorPicker) {
+                    colorPicker.value = cleanHex;
+                }
+                
+                // Remove error styling
+                inputElement.classList.remove('error');
+            }
+        } else if (cleanHex.length > 1) {
+            // Show error styling for invalid colors (but not for empty input)
+            inputElement.classList.add('error');
+        } else {
+            // Reset styling for empty input
+            inputElement.classList.remove('error');
+        }
+    }
+
+    updateCategoryColorFromPicker(id, color, pickerElement) {
+        const category = this.categories.find(c => c.id == id);
+        if (category) {
+            category.color = color.toUpperCase();
+            this.saveCategories();
+            this.notifyContentScript();
+            
+            // Update the hex input and color display
+            const hexInput = pickerElement.closest('.color-controls').querySelector('.hex-input');
+            const colorDisplay = pickerElement.closest('.color-controls').querySelector('.color-display');
+            
+            if (hexInput) {
+                hexInput.value = color.toUpperCase();
+                hexInput.classList.remove('error');
+            }
+            if (colorDisplay) {
+                colorDisplay.style.backgroundColor = color;
+            }
+        }
+    }
+
+    isValidHexColor(hex) {
+        // Check if it's a valid hex color format
+        const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+        return hexRegex.test(hex);
     }
 
     updateCategoryColor(id, color) {
