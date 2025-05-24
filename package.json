@@ -1,0 +1,25 @@
+{
+    "name": "open-highlight",
+    "version": "1.0.0",
+    "description": "Cross-browser extension to highlight and save text snippets",
+    "scripts": {
+      "build": "node build.js",
+      "build:chrome": "npm run build && cd chrome && zip -r ../open-highlight-chrome.zip .",
+      "build:firefox": "npm run build && cd firefox && zip -r ../open-highlight-firefox.zip .",
+      "build:all": "npm run build && npm run build:chrome && npm run build:firefox",
+      "clean": "node build.js clean",
+      "dev:chrome": "npm run build && echo '🚀 Load chrome/ directory in Chrome Developer Mode'",
+      "dev:firefox": "npm run build && echo '🚀 Load firefox/ directory as temporary addon in Firefox'",
+      "dev:firefox-run": "npm run build && web-ext run --source-dir firefox/",
+      "lint:firefox": "web-ext lint --source-dir firefox/",
+      "watch": "nodemon --watch src --watch icons --ext js,html,css,json,png --exec 'npm run build'"
+    },
+    "devDependencies": {
+      "fs-extra": "^11.1.1",
+      "nodemon": "^3.0.1",
+      "web-ext": "^7.8.0"
+    },
+    "keywords": ["browser-extension", "highlight", "cross-browser"],
+    "author": "Keagan",
+    "license": "GPL-3.0-only"
+  }

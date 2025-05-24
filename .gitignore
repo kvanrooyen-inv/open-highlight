@@ -1,1 +1,9 @@
+# Build outputs
+chrome/
+firefox/
+
+# Dependencies
+node_modules/
+
+# Distribution zips
 *.zip
